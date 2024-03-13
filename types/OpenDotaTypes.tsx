@@ -18,7 +18,7 @@ export type Profile = {
 
 export type PlayerDataResponse = {
   profile: Profile;
-  rank_tier: number;
+  rank_tier: number | null;
   leaderboard_rank: number | null;
 };
 

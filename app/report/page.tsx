@@ -5,18 +5,11 @@ import {
   Profile,
 } from "@/types/OpenDotaTypes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { MatchesTable } from "./matches-table";
 import { matchesTableColumns } from "./columns";
 import { Heroes, HeroesIDMapping } from "@/lib/heroes";
+import { rankTierToImageName } from "@/lib/ranks";
 
 export default async function Report() {
   // Load PLayer data:
@@ -58,12 +51,24 @@ export default async function Report() {
 
   return (
     <div>
-      <div className="inline-block text-center m-11">
-        <Avatar>
-          <AvatarImage src={userSteamProfile.avatarfull} />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
-        <p className="mt-4 text-3xl">{userSteamProfile.personaname}</p>
+      <div className="flex m-11 space-x-40">
+        <div className="inline-block text-center ">
+          <Avatar>
+            <AvatarImage src={userSteamProfile.avatarfull} />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <p className="mt-4 text-3xl">{userSteamProfile.personaname}</p>
+        </div>
+
+        <div>
+          <Avatar className="inline-block text-center">
+            <AvatarImage
+              src={rankTierToImageName(parsedPlayerData.rank_tier)}
+            />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <p></p>
+        </div>
       </div>
       <div>
         <MatchesTable columns={matchesTableColumns} data={parsedMatches} />
