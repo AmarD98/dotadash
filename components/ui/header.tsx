@@ -32,6 +32,14 @@ export default function Header() {
             Report
           </NavigationMenuLink>
         </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink
+            href="/teams"
+            className={navigationMenuTriggerStyle()}
+          >
+            Teams
+          </NavigationMenuLink>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );

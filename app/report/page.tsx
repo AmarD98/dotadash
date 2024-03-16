@@ -3,25 +3,30 @@ import {
   MatchesResponse,
   PlayerDataResponse,
   Profile,
+  WinLossCountResponse,
 } from "@/types/OpenDotaTypes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { MatchesTable } from "./matches-table";
+import { DotaDashTable } from "../../components/ui/dota-dash-table";
 import { matchesTableColumns } from "./columns";
 import { Heroes, HeroesIDMapping } from "@/lib/heroes";
 import { rankTierToImageName } from "@/lib/ranks";
+import { Button } from "@/components/ui/button";
+import RefreshButton from "./refresh-button";
 
-export default async function Report() {
-  // Load PLayer data:
+async function fetchPlayerData(): Promise<PlayerDataResponse> {
   const rawPlayerData = await fetch(
     "https://api.opendota.com/api/players/61428209"
   );
   const parsedPlayerData: PlayerDataResponse = await rawPlayerData.json();
-  const userSteamProfile = parsedPlayerData.profile;
+  return parsedPlayerData;
+}
 
+async function fetchMatches(): Promise<Match[]> {
   // Load Recent matches:
   const rawRecentMatches = await fetch(
-    "https://api.opendota.com/api/players/61428209/matches"
+    "https://api.opendota.com/api/players/61428209/matches",
+    { cache: "force-cache" }
   );
   const parsedMatches: Match[] = await rawRecentMatches.json();
 
@@ -37,7 +42,7 @@ export default async function Report() {
     return hero.name + ".png";
   }
 
-  // Assuming parsedMatches and heroesMap are already defined and populated as shown above
+  // Add hero image to matches
   parsedMatches.forEach((match) => {
     const heroData = heroesMap.get(match.hero_id);
     if (heroData) {
@@ -48,11 +53,37 @@ export default async function Report() {
       match.hero_image_url = "Path to default image or leave undefined"; // Placeholder
     }
   });
+  return parsedMatches;
+}
+
+export default async function Report() {
+  // Load PLayer data:
+  const parsedPlayerData: PlayerDataResponse = await fetchPlayerData();
+  const userSteamProfile = parsedPlayerData.profile;
+
+  // Load Win/loss data:
+  const rawWinLossData = await fetch(
+    "https://api.opendota.com/api/players/61428209/wl"
+  );
+  const parsedWinLossData: WinLossCountResponse = await rawWinLossData.json();
+  const winPercent = Math.round(
+    (parsedWinLossData.win / (parsedWinLossData.lose + parsedWinLossData.win)) *
+      100
+  );
+
+  // Load Recent matches:
+  let parsedMatches: Match[] = await fetchMatches();
+
+  async function updateProfile() {
+    "use server";
+    console.log("Refreshing on the server!");
+    parsedMatches = await fetchMatches();
+  }
 
   return (
     <div>
-      <div className="flex m-11 space-x-40">
-        <div className="inline-block text-center ">
+      <div className=" flex flex-row justify-between items-center w-full px-9">
+        <div className="  text-center ">
           <Avatar>
             <AvatarImage src={userSteamProfile.avatarfull} />
             <AvatarFallback>CN</AvatarFallback>
@@ -60,18 +91,27 @@ export default async function Report() {
           <p className="mt-4 text-3xl">{userSteamProfile.personaname}</p>
         </div>
 
-        <div>
-          <Avatar className="inline-block text-center">
+        <div className=" text-center">
+          <Avatar className=" ">
             <AvatarImage
               src={rankTierToImageName(parsedPlayerData.rank_tier)}
             />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          <p></p>
+          <p className="mt-4 text-3xl ">
+            {parsedWinLossData.win} - {parsedWinLossData.lose}
+          </p>
+
+          <p className="mt-4 text-3xl">{winPercent}%</p>
+        </div>
+        <div className=" ">
+          <Button variant={"secondary"} onClick={updateProfile}>
+            Refresh
+          </Button>
         </div>
       </div>
       <div>
-        <MatchesTable columns={matchesTableColumns} data={parsedMatches} />
+        <DotaDashTable columns={matchesTableColumns} data={parsedMatches} />
       </div>
     </div>
   );

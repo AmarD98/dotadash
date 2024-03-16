@@ -18,15 +18,16 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
-interface MatchesTableProps<TData, TValue> {
+interface DotaDashTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function MatchesTable<TData, TValue>({
+export function DotaDashTable<TData, TValue>({
   columns,
   data,
-}: MatchesTableProps<TData, TValue>) {
+}: DotaDashTableProps<TData, TValue>) {
+  console.log("Rendering DotaDashTable!");
   const table = useReactTable({
     data,
     columns,
