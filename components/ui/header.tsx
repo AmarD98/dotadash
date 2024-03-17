@@ -18,7 +18,7 @@ export default function Header() {
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink
-            href="/heroes"
+            href="/hero"
             className={navigationMenuTriggerStyle()}
           >
             Heroes
